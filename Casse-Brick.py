@@ -1,5 +1,3 @@
- ##### IMPORTS #####
-
 from upemtk import *
 from random import randint
 import sys
@@ -8,16 +6,14 @@ from time import clock
 from math import ceil
 import pickle
 
-##### FONCTIONS #####
-
 def ready(hauteur, largeur):
-    """Affiche le message à l'écran et attend que l'utilisateur appuie sur une touche."""
-    texte(largeur//2,hauteur//2,'Appuyer sur une touche','red','center',taille='30',tag='pret')
+    """Affiche et attend que l'utilisateur appuie sur une touche."""
+    texte(largeur//2,hauteur//2,'Appuyer sur une touche !','red','center',taille='30',tag='pret')
     attente_touche()
     efface('pret')
 
 def bord_fenêtre_cotes(xBalle, yBalle, vx, rayon, largeurFenetre):
-    """ Vérifie si la balle touche un côté un coté de la fenêtre, si oui la fait rebondir. """
+    """ Vérifie si la balle touche un côté de la fenêtre, si oui la fait rebondir. """
     if xBalle+rayon > largeurFenetre and vx>0:
         return -vx
     if xBalle-rayon < 0 and vx<0:
@@ -48,7 +44,7 @@ def victoire(lstBrique):
 
 def raquette(ax, ay, largeur, hauteur):
     """ Affiche la raquette du jeu """
-    rectangle(ax, ay, ax+largeur, ay-hauteur, couleur='black', remplissage='gold', epaisseur=1, tag='raquette')
+    rectangle(ax, ay, ax+largeur, ay-hauteur, couleur='black', remplissage='red', epaisseur=1, tag='raquette')
 
 def mouvement_raquette(largeurFenetre, largeurRaquette, ax):
     """ Déplace la raquette en fonction du mouvement du curseur. """
@@ -214,17 +210,17 @@ def bonus(x, y, pre):
         # a=randint(1,len(liste_chances)*3)
     if a in liste_chances:
         if a == 1:
-            return ('PetitRaquette',x,y,'red')
+            return ('-Raquette',x,y,'red')
         elif a == 2:
-            return ('GrandRaquette',x,y,'green')
+            return ('+Raquette',x,y,'green')
         elif a == 3:
-            return ('ViePlus',x,y,'blue')
+            return ('Vie+',x,y,'green')
         elif a == 4:
-            return ('ScoreBonus',x,y,'orange')
+            return ('Score+',x,y,'green')
         elif a == 5:
-            return ('VieMoins',x,y,'black')
+            return ('Vie-',x,y,'red')
         elif a == 6:
-            return ('ScoreMalus',x,y,'purple')
+            return ('Score-',x,y,'red')
 
 def majBonus(rayon):
     """ Affiche les bonus et met à jour les positions. """
@@ -242,22 +238,22 @@ def collision_bonus(xRaquette, yRaquette, largeurRaquette, hauteurRaquette, rayo
     if len(lstBonus) > 0:
         for i in range(len(lstBonus)):
             if (lstBonus[i][1]>=xRaquette) and (lstBonus[i][1]<=xRaquette+largeurRaquette) and (lstBonus[i][2]+rayon>=yRaquette-hauteurRaquette) and (lstBonus[i][2]+rayon<=yRaquette):
-                if lstBonus[i][0] == 'PetitRaquette':
+                if lstBonus[i][0] == '-Raquette':
                     lstBonus.pop(i)
                     return 'Raquette -', largeurRaquette-largeurRaquette//5, vies, score
-                elif lstBonus[i][0] == 'GrandRaquette':
+                elif lstBonus[i][0] == '+Raquette':
                     lstBonus.pop(i)
                     return 'Raquette +', largeurRaquette+largeurRaquette//5, vies, score
-                elif lstBonus[i][0] == 'ViePlus':
+                elif lstBonus[i][0] == 'Vie+':
                     lstBonus.pop(i)
                     return 'Balle +', largeurRaquette, vies+1, score
-                elif lstBonus[i][0] == 'ScoreBonus':
+                elif lstBonus[i][0] == 'Score+':
                     lstBonus.pop(i)
                     return 'Score +', largeurRaquette, vies, score+50
-                elif lstBonus[i][0] == 'VieMoins':
+                elif lstBonus[i][0] == 'Vie-':
                     lstBonus.pop(i)
                     return 'Balle -', largeurRaquette, vies-1, score
-                elif lstBonus[i][0] == 'ScoreMalus':
+                elif lstBonus[i][0] == 'Score-':
                     lstBonus.pop(i)
                     return 'Score -', largeurRaquette, vies, score-50
     return lastBonus, largeurRaquette, vies, score
@@ -272,7 +268,7 @@ def affichage_hud(largeurFenetre, hauteurFenetre, tempsAretirer, vies, lastBonus
         texte(largeurFenetre+100, 155, 'Score:', couleur='black', ancrage='center', taille='15', tag='hudFIX')
         texte(largeurFenetre+100, 245, 'Temps:', couleur='black', ancrage='center', taille='15', tag='hudFIX')
         texte(largeurFenetre+100, 335, 'Balles:', couleur='black', ancrage='center', taille='15', tag='hudFIX')
-        texte(largeurFenetre+100, 425, 'Dernier bonus/malus:', couleur='black', ancrage='center', taille='15', tag='hudFIX')
+        texte(largeurFenetre+100, 425, 'Dernier bonus:', couleur='black', ancrage='center', taille='15', tag='hudFIX')
         texte(largeurFenetre+100, 550, 'Pause (ALT)', couleur='grey', ancrage='center', taille='15', tag='txtPAUSE')
         rectangle(largeurFenetre+15,525, largeurFenetre+185, 575, couleur='grey', remplissage='', epaisseur=1, tag='rectPAUSE')
     else:
@@ -323,9 +319,6 @@ def affichage_debut(hauteurFenetre,largeurFenetre):
     temps = clock()
     while True:
         efface_tout()
-        if 'save.txt' in os.listdir():
-            rectangle(largeurFenetre//25, hauteurFenetre-(hauteurFenetre//25), largeurFenetre//4, hauteurFenetre-(hauteurFenetre//7), couleur='orange', remplissage='', epaisseur=2, tag='rectSAVE')
-            texte(((largeurFenetre//25)+(largeurFenetre//4))//2, ((hauteurFenetre-(hauteurFenetre//25))+(hauteurFenetre-(hauteurFenetre//7)))//2, 'Save', couleur='orange', ancrage='center', taille=20, tag='textSAVE')
         rectangle((largeurFenetre//4)*3+200, hauteurFenetre-(hauteurFenetre//25), largeurFenetre-(largeurFenetre//25)+200, hauteurFenetre-(hauteurFenetre//7), couleur='black', remplissage='', epaisseur=2, tag='')
         texte((((largeurFenetre//4)*3+200)+(largeurFenetre-(largeurFenetre//25)+200))//2, ((hauteurFenetre-(hauteurFenetre//25))+(hauteurFenetre-(hauteurFenetre//7)))//2, 'Quitter', couleur='black', ancrage='center', taille=20,tag='')
         texte(largeurFenetre//2+100, 70, 'Casse Brick', couleur='blue', ancrage='center', taille=30, tag='')
@@ -505,12 +498,6 @@ def pause(hauteurFenetre, largeurFenetre, lstBrique, nbreBriqueParLigne, nbreLig
     efface('balle')
     efface('brique')
     efface('Bonus')
-    rectangle(100, (hauteurFenetre//3)-45, largeurFenetre-100, 45, couleur='green', remplissage='', epaisseur=3, tag='pause')
-    texte(((100)+(largeurFenetre-100))//2, (((hauteurFenetre//3)-45)+(45))//2, 'Reprendre', couleur='green', ancrage='center', taille='22', tag='pause')
-    rectangle(100, (hauteurFenetre//3)*2-45, largeurFenetre-100, (hauteurFenetre//3)+45, couleur='orange', remplissage='', epaisseur=3, tag='pause')
-    texte(((100)+(largeurFenetre-100))//2, (((hauteurFenetre//3)*2-45)+((hauteurFenetre//3)+45))//2, 'Sauvegarder', couleur='orange', ancrage='center', taille='22', tag='pause')
-    rectangle(100, hauteurFenetre-45, largeurFenetre-100, (hauteurFenetre//3)*2+45, couleur='red', remplissage='', epaisseur=3, tag='pause')
-    texte((100+(largeurFenetre-100))//2, ((hauteurFenetre-45)+((hauteurFenetre//3)*2+45))//2, 'Quitter', couleur='red', ancrage='center', taille='22', tag='pause')
     while True:
         mise_a_jour()
         ev = donne_evenement()
@@ -524,9 +511,9 @@ def pause(hauteurFenetre, largeurFenetre, lstBrique, nbreBriqueParLigne, nbreLig
                 return 1, tempsAretirer+clock()-temps
 
 def sauvegarder(hauteurFenetre, largeurFenetre, lstBrique, nbreBriqueParLigne, nbreLigne, temps):
-    """Sauvegarde l'état du niveau dans le fichier save.txt"""
+    """Sauvegarde l'état du niveau dans le fichier save.txt ( ne fonctionne pas )"""
     texte(largeurFenetre//2, (hauteurFenetre//3)*2, 'La partie a été sauvegardée', couleur='orange', ancrage='center', taille='17', tag='pause')
-    fichier = open('save.txt','wb')
+    fichier = open('save.txt')
     pickle.dump(temps, fichier)
     pickle.dump(score, fichier)
     pickle.dump(lstBonus, fichier)
